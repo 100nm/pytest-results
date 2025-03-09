@@ -1,0 +1,102 @@
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
+[dependency-groups]
+dev = [
+    "hatch",
+    "mypy",
+    "pydantic",
+    "ruff",
+]
+test = [
+    "pytest-cov",
+]
+
+[project]
+name = "pytest-results"
+version = "0.0.0"
+description = ""
+license = { text = "MIT" }
+readme = "README.md"
+requires-python = ">=3.12, <4"
+authors = [{ name = "remimd" }]
+keywords = []
+classifiers = [
+    "Development Status :: 4 - Beta",
+    "Topic :: Software Development :: Libraries",
+    "Topic :: Software Development :: Libraries :: Python Modules",
+    "Topic :: Software Development :: Testing",
+    "Programming Language :: Python",
+    "Programming Language :: Python :: 3",
+    "Programming Language :: Python :: 3 :: Only",
+    "Operating System :: OS Independent",
+    "Intended Audience :: Developers",
+    "Natural Language :: English",
+    "Typing :: Typed",
+]
+dependencies = [
+    "orjson",
+    "pytest",
+]
+
+[project.entry-points.pytest11]
+pytest-results = "pytest_results.contrib.pytest.plugin"
+
+[project.urls]
+Repository = "https://github.com/100nm/pytest-results"
+
+[tool.coverage.report]
+exclude_lines = [
+    "pass",
+    "pragma: no cover",
+    "raise NotImplementedError",
+]
+
+[tool.hatch.build]
+skip-excluded-dirs = true
+
+[tool.hatch.build.targets.sdist]
+include = ["pytest_results"]
+
+[tool.hatch.build.targets.wheel]
+packages = ["pytest_results"]
+
+[tool.mypy]
+check_untyped_defs = true
+disallow_any_generics = true
+disallow_subclassing_any = true
+disallow_untyped_defs = true
+follow_imports = "silent"
+no_implicit_reexport = true
+plugins = ["pydantic.mypy"]
+warn_redundant_casts = true
+warn_unused_ignores = true
+
+[tool.pydantic-mypy]
+init_forbid_extra = true
+init_typed = true
+warn_required_dynamic_aliases = true
+
+[tool.pytest.ini_options]
+python_files = "test_*.py"
+addopts = "--tb short --cov ./ --cov-report term-missing:skip-covered"
+testpaths = "**/tests/"
+
+[tool.ruff]
+line-length = 88
+indent-width = 4
+
+[tool.ruff.format]
+quote-style = "double"
+indent-style = "space"
+skip-magic-trailing-comma = false
+line-ending = "auto"
+
+[tool.ruff.lint]
+extend-select = ["F", "I", "N"]
+fixable = ["ALL"]
+
+[tool.uv]
+default-groups = ["dev", "test"]
+package = true
