@@ -1,7 +1,6 @@
 from __future__ import annotations
 
 import os
-import shutil
 import time
 from dataclasses import dataclass, field
 from pathlib import Path
@@ -27,7 +26,7 @@ class ResultsMismatchError(AssertionError, PytestResultsError):
 
     def accept_diff(self) -> None:
         self.__ensure_file_exists(self.previous_filepath)
-        shutil.copyfile(self.current_filepath, self.previous_filepath)
+        self.storage.copy(self.current_filepath, self.previous_filepath)
 
     def show_diff(self, command: str) -> None:
         self.__ensure_file_exists(self.previous_filepath)

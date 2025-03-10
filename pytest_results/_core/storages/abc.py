@@ -8,6 +8,10 @@ class Storage(Protocol):
     __slots__ = ()
 
     @abstractmethod
+    def copy(self, filepath: Path, destination: Path) -> None:
+        raise NotImplementedError
+
+    @abstractmethod
     def exists(self, path: Path) -> bool:
         raise NotImplementedError
 

@@ -19,7 +19,7 @@ class _AssertResultsMatch[T](Protocol):
     __slots__ = ()
 
     @abstractmethod
-    def __call__(self, current_result: T, file_suffix: str = ...) -> None:
+    def __call__(self, current_result: T, /, file_suffix: str = ...) -> None:
         raise NotImplementedError
 
 
@@ -29,7 +29,7 @@ class AssertResultsMatch[T](_AssertResultsMatch[T]):
     storage: Storage
     dumper: Dumper[T] | None = field(default=None)
 
-    def __call__(self, current_result: T, file_suffix: str = "") -> None:
+    def __call__(self, current_result: T, /, file_suffix: str = "") -> None:
         dumper = self.dumper or select_dumper_from(current_result)
         storage = self.storage
 
@@ -67,7 +67,7 @@ def select_dumper_from(value: Any) -> Dumper[Any]:
 
 try:
     from pydantic import BaseModel
-except ImportError:
+except ImportError:  # pragma: no cover
     ...
 else:
     from pytest_results._core.dumpers.pydantic import PydanticJSONDumper
