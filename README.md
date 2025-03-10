@@ -4,6 +4,10 @@
 [![PyPI](https://img.shields.io/pypi/v/pytest-results.svg?color=blue)](https://pypi.org/project/pytest-results/)
 [![Ruff](https://img.shields.io/endpoint?url=https://raw.githubusercontent.com/astral-sh/ruff/main/assets/badge/v2.json)](https://github.com/astral-sh/ruff)
 
+Easily spot regressions in your tests.
+
+The package lets you write non-regression tests.
+
 ## Installation
 
 ⚠️ _Requires Python 3.12 or higher_
@@ -11,3 +15,30 @@
 ```bash
 pip install pytest-results
 ```
+
+## Quick start
+
+First, retrieve the Pytest fixture `assert_results_match` in your test:
+
+```python
+def test_function(assert_results_match):
+    result = {"hello": "world"}
+    assert_results_match(result)
+```
+
+All results are stored in JSON files at the root of your project in the
+`__pytest_results__` folder.
+
+In case of regression, to open the interactive comparison, add the `--ide` parameter
+to Pytest with the name of your IDE:
+
+```bash
+pytest --ide vscode
+```
+
+_At present, the IDEs supported are `cursor`, `pycharm` and `vscode`._
+
+## Resources
+
+* [**assert_results_match fixture**](https://github.com/100nm/pytest-results/tree/prod/documentation/assert-results-match-fixture.md)
+* [**Configuration**](https://github.com/100nm/pytest-results/tree/prod/documentation/configuration.md)

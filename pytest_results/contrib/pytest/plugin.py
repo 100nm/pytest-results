@@ -23,7 +23,7 @@ def pytest_addoption(parser: Parser) -> None:
         default=False,
     )
 
-    diff_help = "Command line to open an interactive comparison. Example: `code -w -d {current} {previous}`."
+    diff_help = "Command line to open an interactive comparison. Example: `code -d -w {current} {previous}`."
     group.addoption(
         "--diff",
         dest="diff",
@@ -95,9 +95,9 @@ class PytestResultsConfig:
     __slots__ = ("__config",)
 
     __diff_commands: ClassVar[Mapping[str, str]] = {
-        "cursor": "cursor -w -d {current} {previous}",
+        "cursor": "cursor -d -r -w {current} {previous}",
         "pycharm": "pycharm diff {current} {previous}",
-        "vscode": "code -w -d {current} {previous}",
+        "vscode": "code -d -r -w {current} {previous}",
     }
 
     def __init__(self, pytest_config: Config) -> None:

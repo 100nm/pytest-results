@@ -1,4 +1,4 @@
-from abc import abstractmethod
+from abc import ABC, abstractmethod
 from typing import Protocol, runtime_checkable
 
 
@@ -13,7 +13,7 @@ class Dumper[T](Protocol):
         raise NotImplementedError
 
 
-class JSONDumper[T](Dumper[T], Protocol):
+class JSONDumper[T](Dumper[T], ABC):
     __slots__ = ()
 
     file_format: str = "json"

@@ -16,7 +16,7 @@ test = [
 [project]
 name = "pytest-results"
 version = "0.0.0"
-description = ""
+description = "Easily spot regressions in your tests."
 license = { text = "MIT" }
 readme = "README.md"
 requires-python = ">=3.12, <4"
@@ -52,6 +52,7 @@ exclude_lines = [
     "pragma: no cover",
     "raise NotImplementedError",
 ]
+omit = ["pytest_results/contrib/pytest/plugin.py"]
 
 [tool.hatch.build]
 skip-excluded-dirs = true
@@ -80,7 +81,7 @@ warn_required_dynamic_aliases = true
 
 [tool.pytest.ini_options]
 python_files = "test_*.py"
-addopts = "--tb short --cov ./ --cov-report term-missing:skip-covered"
+addopts = "--tb short --cov ./ --cov-append --cov-report term-missing:skip-covered"
 testpaths = "**/tests/"
 
 [tool.ruff]

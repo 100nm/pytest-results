@@ -1,4 +1,5 @@
 import os
+import shutil
 from contextlib import suppress
 from dataclasses import dataclass
 from pathlib import Path
@@ -10,6 +11,9 @@ from pytest_results._core.storages.abc import Storage
 class LocalStorage(Storage):
     dir: Path
     temporary_dir: Path
+
+    def copy(self, filepath: Path, destination: Path) -> None:
+        shutil.copyfile(filepath, destination)
 
     def exists(self, path: Path) -> bool:
         return path.exists()
