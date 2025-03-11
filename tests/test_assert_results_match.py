@@ -5,14 +5,21 @@ from pytest_results import AssertResultsMatchType
 
 
 class TestAssertResultsMatch:
-    def test_assert_results_match_with_success(
+    def test_assert_results_match_with_success(self) -> dict[str, str]:
+        return {"title": "Hello, World!"}
+
+    async def test_assert_results_match_with_async(self) -> dict[str, str]:
+        return {"title": "Hello, World!"}
+
+    async def test_assert_results_match_with_multiple_assert(
         self,
         assert_results_match: AssertResultsMatchType,
     ) -> None:
-        result = {"title": "Hello, World!"}
-        assert_results_match(result)
+        for i in range(3):
+            result = {"title": i}
+            assert_results_match(result, f"_{i}")
 
-    def test_assert_results_match_with_failure_raise_(
+    def test_assert_results_match_with_failure_raise_assertion_error(
         self,
         assert_results_match: AssertResultsMatchType,
     ) -> None:
@@ -21,12 +28,8 @@ class TestAssertResultsMatch:
         with pytest.raises(AssertionError):
             assert_results_match(result)
 
-    def test_assert_results_match_with_pydantic_base_model(
-        self,
-        assert_results_match: AssertResultsMatchType,
-    ) -> None:
+    def test_assert_results_match_with_pydantic_base_model(self) -> BaseModel:
         class Model(BaseModel):
             title: str
 
-        result = Model(title="Hello, World!")
-        assert_results_match(result)
+        return Model(title="Hello, World!")

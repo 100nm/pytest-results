@@ -18,13 +18,15 @@ pip install pytest-results
 
 ## Quick start
 
-First, retrieve the Pytest fixture `assert_results_match` in your test:
+First, return the value where you want to check the regression:
 
 ```python
-def test_function(assert_results_match):
-    result = {"hello": "world"}
-    assert_results_match(result)
+def test_function():
+    return {"hello": "world"}
 ```
+
+> [!NOTE]
+> The returned value must be serializable.
 
 All results are stored in JSON files at the root of your project in the
 `__pytest_results__` folder.

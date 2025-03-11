@@ -10,6 +10,7 @@ dev = [
     "ruff",
 ]
 test = [
+    "pytest-asyncio",
     "pytest-cov",
 ]
 
@@ -82,6 +83,8 @@ warn_required_dynamic_aliases = true
 [tool.pytest.ini_options]
 python_files = "test_*.py"
 addopts = "--tb short --cov ./ --cov-append --cov-report term-missing:skip-covered"
+asyncio_default_fixture_loop_scope = "session"
+asyncio_mode = "auto"
 testpaths = "**/tests/"
 
 [tool.ruff]

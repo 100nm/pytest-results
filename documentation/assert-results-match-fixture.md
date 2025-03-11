@@ -16,6 +16,15 @@ def test_function(assert_results_match: AssertResultsMatchType) -> None:
     assert_results_match(result)
 ```
 
+If you have only one `assert_results_match` at the end of your test, you can use
+`return`, and the plugin will take care of it automatically:
+
+```python
+def test_function() -> ...:
+    result = ...
+    return result
+```
+
 > [!NOTE]
 > `result` must be a Python object serializable to JSON or an instance of Pydantic 
 > `BaseModel`.
