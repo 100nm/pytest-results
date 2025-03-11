@@ -1,13 +1,13 @@
 from abc import abstractmethod
 from dataclasses import dataclass, field
-from functools import singledispatch
 from pathlib import Path
-from typing import Any, Protocol, runtime_checkable
+from types import TracebackType
+from typing import Any, Protocol, Self, runtime_checkable
 
 import pytest
 
 from pytest_results._core.dumpers.abc import Dumper
-from pytest_results._core.dumpers.json import SimpleJSONDumper
+from pytest_results._core.select_dumper import select_dumper_from
 from pytest_results._core.storages.abc import Storage
 from pytest_results.exceptions import ResultsMismatchError
 
@@ -62,18 +62,43 @@ class AssertResultsMatch[T](_AssertResultsMatch[T]):
         return Path(*segments)
 
 
-@singledispatch
-def select_dumper_from(value: Any) -> Dumper[Any]:
-    return SimpleJSONDumper()
+class AssertResultsMatchGroup[T](_AssertResultsMatch[T]):
+    __slots__ = ("__call", "__count", "__exceptions")
 
+    __call: _AssertResultsMatch[T]
+    __count: int
+    __exceptions: list[ResultsMismatchError]
 
-try:
-    from pydantic import BaseModel
-except ImportError:  # pragma: no cover
-    ...
-else:
-    from pytest_results._core.dumpers.pydantic import PydanticJSONDumper
+    def __init__(self, call: _AssertResultsMatch[T]) -> None:
+        self.__call = call
+        self.__count = 0
+        self.__exceptions = []
 
-    @select_dumper_from.register
-    def _(value: BaseModel) -> Dumper[BaseModel]:
-        return PydanticJSONDumper()
+    def __call__(self, current_result: T, /, file_suffix: str = "") -> None:
+        __tracebackhide__ = True
+
+        if not file_suffix and (count := self.__count) > 0:
+            file_suffix = f"_{count}"
+
+        self.__count += 1
+
+        try:
+            return self.__call(current_result, file_suffix)
+        except ResultsMismatchError as exc:
+            self.__exceptions.append(exc)
+
+    def __enter__(self) -> Self:
+        return self
+
+    def __exit__(
+        self,
+        exc_type: type[BaseException] | None,
+        exc_value: BaseException | None,
+        traceback: TracebackType | None,
+    ) -> None:
+        if exceptions := self.__exceptions:
+            raise (
+                exceptions[0]
+                if len(exceptions) == 1
+                else ExceptionGroup("", exceptions)
+            )

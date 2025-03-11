@@ -1,5 +1,13 @@
 import warnings
-from collections.abc import Awaitable, Callable, Generator, Iterable, Iterator, Mapping
+from collections.abc import (
+    Awaitable,
+    Callable,
+    Generator,
+    Iterable,
+    Iterator,
+    Mapping,
+    Sequence,
+)
 from functools import update_wrapper
 from inspect import iscoroutinefunction
 from pathlib import Path
@@ -8,7 +16,12 @@ from typing import Any, ClassVar
 
 import pytest
 
-from pytest_results import AssertResultsMatch, AssertResultsMatchType, LocalStorage
+from pytest_results import (
+    AssertResultsMatch,
+    AssertResultsMatchGroup,
+    AssertResultsMatchType,
+    LocalStorage,
+)
 from pytest_results.exceptions import ResultsMismatchError
 
 __all__ = ()
@@ -93,7 +106,7 @@ def pytest_addoption(parser: pytest.Parser) -> None:
     )
 
 
-@pytest.hookimpl(tryfirst=True)
+@pytest.hookimpl
 def pytest_collection_modifyitems(items: Iterable[pytest.Item]) -> None:
     for item in items:
         if isinstance(item, pytest.Function):
@@ -108,17 +121,17 @@ def pytest_pyfunc_call(
 
     try:
         result = yield
+
     except ResultsMismatchError as mismatch:
-        config = PytestResultsConfig(pyfuncitem.config)
-
-        if config.accept_all_diff:
-            mismatch.accept_diff()
-            return pytest.skip()
-
-        if command := config.diff_command:
-            mismatch.show_diff(command)
-
+        __on_mismatches((mismatch,), pyfuncitem.config)
         raise mismatch
+
+    except ExceptionGroup as exc_group:
+        if sub_exc_group := exc_group.subgroup(ResultsMismatchError):
+            mismatches = tuple(__iter_nested_exceptions(sub_exc_group))
+            __on_mismatches(mismatches, pyfuncitem.config)
+
+        raise exc_group
 
     return result
 
@@ -136,7 +149,8 @@ def assert_results_match(
 ) -> AssertResultsMatchType:
     results_dir = request.config.rootpath / "__pytest_results__"
     storage = LocalStorage(results_dir, _pytest_results_tmpdir)
-    return AssertResultsMatch(request, storage)
+    assert_function: AssertResultsMatchType = AssertResultsMatch(request, storage)
+    return AssertResultsMatchGroup(assert_function)
 
 
 def __autodetect_result(pyfuncitem: pytest.Function) -> pytest.Function:
@@ -146,24 +160,54 @@ def __autodetect_result(pyfuncitem: pytest.Function) -> pytest.Function:
     if iscoroutinefunction(wrapped):
 
         async def wrapper(*args: Any, **kwargs: Any) -> None:
-            result = await wrapped(*args, **kwargs)
-            __run_assert_results_match(result, pyfuncitem)
+            with get_assert_results_match_fixture(pyfuncitem) as assert_function:
+                if (result := await wrapped(*args, **kwargs)) is not None:
+                    assert_function(result)
 
     else:
 
         def wrapper(*args: Any, **kwargs: Any) -> None:
-            result = wrapped(*args, **kwargs)
-            __run_assert_results_match(result, pyfuncitem)
+            with get_assert_results_match_fixture(pyfuncitem) as assert_function:
+                if (result := wrapped(*args, **kwargs)) is not None:
+                    assert_function(result)
 
     pyfuncitem.obj = update_wrapper(wrapper, wrapped)
     return pyfuncitem
 
 
-def __run_assert_results_match[T](result: T, pyfuncitem: pytest.Function) -> T:
-    __tracebackhide__ = True
+def __iter_nested_exceptions[T: Exception](
+    exception_group: ExceptionGroup[T],
+) -> Iterator[T]:
+    for exception in exception_group.exceptions:
+        if isinstance(exception, ExceptionGroup):
+            yield from __iter_nested_exceptions(exception)
+            continue
 
-    if result is not None:
-        assert_ = pyfuncitem._request.getfixturevalue("assert_results_match")
-        assert_(result)
+        yield exception
 
-    return result
+
+def get_assert_results_match_fixture(
+    pyfuncitem: pytest.Function,
+) -> AssertResultsMatchGroup[Any]:
+    fixture_name = assert_results_match.__name__
+    return pyfuncitem._request.getfixturevalue(fixture_name)
+
+
+def __on_mismatches(
+    mismatches: Sequence[ResultsMismatchError],
+    pytest_config: pytest.Config,
+) -> None:
+    if not mismatches:
+        return
+
+    config = PytestResultsConfig(pytest_config)
+
+    if config.accept_all_diff:
+        for mismatch in mismatches:
+            mismatch.accept_diff()
+
+        pytest.skip()
+
+    elif command := config.diff_command:
+        for mismatch in mismatches:
+            mismatch.show_diff(command)
