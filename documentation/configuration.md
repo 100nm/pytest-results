@@ -2,19 +2,19 @@
 
 ## [Pytest](https://github.com/pytest-dev/pytest)
 
-### Accept all diff
+### Accept diff
 
-Automatically saves the new result if `assert_results_match` fails.
+Automatically saves the new result if `regression.check` fails.
 
 With Pytest command line:
 
 ```bash
-pytest --accept-all-diff
+pytest --accept-diff
 ```
 
 ### Diff
 
-Executes a command line when `assert_results_match` fails.
+Executes a command line when `regression.check` fails.
 
 Command line parameters:
 * `{current}`: path to temporary file containing the current test result.
@@ -43,7 +43,7 @@ code -d -w {current} {previous}
 
 ### IDE
 
-Executes an interactive comparison based on the chosen IDE when `assert_results_match`
+Executes an interactive comparison based on the chosen IDE when `regression.check`
 fails.
 
 _If `diff` is defined, it takes priority._

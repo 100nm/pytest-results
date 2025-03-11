@@ -39,5 +39,5 @@ _At present, the IDEs supported are `cursor`, `pycharm` and `vscode`._
 
 ## Resources
 
-* [**assert_results_match fixture**](https://github.com/100nm/pytest-results/tree/prod/documentation/assert-results-match-fixture.md)
+* [**Regression fixture**](https://github.com/100nm/pytest-results/tree/prod/documentation/regression-fixture.md)
 * [**Configuration**](https://github.com/100nm/pytest-results/tree/prod/documentation/configuration.md)
