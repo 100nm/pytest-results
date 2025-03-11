@@ -9,9 +9,9 @@ All results are stored in JSON files at the root of your project in the
 Example:
 
 ```python
-from pytest_results import RegressionType
+from pytest_results import Regression
 
-def test_function(regression: RegressionType) -> None:
+def test_function(regression: Regression) -> None:
     result = ...
     regression.check(result)
 ```
@@ -32,9 +32,9 @@ def test_function() -> ...:
 It is possible to call `regression.check` several times in the same test:
 
 ```python
-from pytest_results import RegressionType
+from pytest_results import Regression
 
-def test_function(regression: RegressionType) -> None:
+def test_function(regression: Regression) -> None:
     for i in range(...):
         result = ...
         regression.check(result)

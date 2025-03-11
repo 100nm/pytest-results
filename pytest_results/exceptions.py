@@ -1,13 +1,10 @@
 from __future__ import annotations
 
-import os
-import time
-from dataclasses import dataclass, field
 from pathlib import Path
 from typing import TYPE_CHECKING
 
 if TYPE_CHECKING:
-    from pytest_results import Storage
+    from pytest_results import _CommandRunner, _Storage
 
 __all__ = ("PytestResultsError", "ResultsMismatchError")
 
@@ -15,33 +12,56 @@ __all__ = ("PytestResultsError", "ResultsMismatchError")
 class PytestResultsError(Exception): ...
 
 
-@dataclass(slots=True)
 class ResultsMismatchError(AssertionError, PytestResultsError):
-    current_filepath: Path
-    previous_filepath: Path
-    storage: Storage = field(repr=False)
+    __slots__ = (
+        "__command_runner",
+        "__current_filepath",
+        "__previous_filepath",
+        "__storage",
+    )
+
+    __command_runner: _CommandRunner
+    __current_filepath: Path
+    __previous_filepath: Path
+    __storage: _Storage
+
+    def __init__(
+        self,
+        command_runner: _CommandRunner,
+        current: Path,
+        previous: Path,
+        storage: _Storage,
+    ) -> None:
+        self.__command_runner = command_runner
+        self.__current_filepath = current
+        self.__previous_filepath = previous
+        self.__storage = storage
 
     def __str__(self) -> str:
-        return self.__to_string(self.current_filepath, self.previous_filepath)
+        return self.__to_string(self.current, self.previous)
+
+    @property
+    def current(self) -> Path:
+        return self.__current_filepath
+
+    @property
+    def previous(self) -> Path:
+        return self.__previous_filepath
 
     def accept_diff(self) -> None:
-        self.__ensure_file_exists(self.previous_filepath)
-        self.storage.copy(self.current_filepath, self.previous_filepath)
+        self.__ensure_file_exists(self.previous)
+        self.__storage.copy(self.current, self.previous)
 
     def show_diff(self, command: str) -> None:
-        self.__ensure_file_exists(self.previous_filepath)
-        command = command.format(
-            current=self.current_filepath,
-            previous=self.previous_filepath,
-        )
-        os.system(command)
-        time.sleep(1)
+        self.__ensure_file_exists(self.previous)
+        command = command.format(current=self.current, previous=self.previous)
+        self.__command_runner(command)
 
     def __ensure_file_exists(self, filepath: Path) -> None:
-        if self.storage.exists(filepath):
+        if self.__storage.exists(filepath):
             return
 
-        self.storage.write(filepath)
+        self.__storage.write(filepath)
 
     @staticmethod
     def __to_string(current: object, previous: object) -> str:

@@ -1,6 +1,6 @@
 from pydantic import BaseModel
 
-from pytest_results import RegressionType
+from pytest_results import Regression
 
 
 class TestRegression:
@@ -10,7 +10,7 @@ class TestRegression:
     async def test_check_with_async(self) -> dict[str, str]:
         return {"title": "Hello, World!"}
 
-    def test_check_with_multiple_check(self, regression: RegressionType) -> None:
+    def test_check_with_multiple_check(self, regression: Regression) -> None:
         for i in range(3):
             result = {"title": i}
             regression.check(result)

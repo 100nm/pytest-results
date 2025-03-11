@@ -16,7 +16,7 @@ from typing import Any, ClassVar
 
 import pytest
 
-from pytest_results import LocalStorage, Regression, RegressionGroup, _json_dump
+from pytest_results import _LocalStorage, _RegressionImpl, _RegressionStack
 from pytest_results.exceptions import ResultsMismatchError
 
 __all__ = ()
@@ -141,12 +141,12 @@ def _pytest_results_tmpdir() -> Iterator[Path]:
 def regression(
     request: pytest.FixtureRequest,
     _pytest_results_tmpdir: Path,
-) -> RegressionGroup[Any]:
+) -> _RegressionStack:
     results_dir = request.config.rootpath / "__pytest_results__"
-    storage = LocalStorage(results_dir, _pytest_results_tmpdir)
+    storage = _LocalStorage(results_dir, _pytest_results_tmpdir)
     testinfo = tuple(__iter_testinfo(request))
-    regression = Regression(_json_dump, "json", storage, testinfo)
-    return RegressionGroup(regression)
+    delegate = _RegressionImpl(storage, testinfo)
+    return _RegressionStack(delegate)
 
 
 def __autodetect_result(pyfuncitem: pytest.Function) -> pytest.Function:
@@ -191,7 +191,7 @@ def __iter_testinfo(request: pytest.FixtureRequest) -> Iterator[str]:
     yield request.function.__name__
 
 
-def __get_regression_fixture(pyfuncitem: pytest.Function) -> RegressionGroup[Any]:
+def __get_regression_fixture(pyfuncitem: pytest.Function) -> _RegressionStack:
     return pyfuncitem._request.getfixturevalue(regression.__name__)
 
 
