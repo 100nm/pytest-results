@@ -7,7 +7,7 @@ from typing import Any, Protocol, Self, runtime_checkable
 import pytest
 
 from pytest_results._core.dumpers.abc import Dumper
-from pytest_results._core.select_dumper import select_json_dumper_from
+from pytest_results._core.select_dumper import select_json_dumper
 from pytest_results._core.storages.abc import Storage
 from pytest_results.exceptions import ResultsMismatchError
 
@@ -32,7 +32,7 @@ class AssertResultsMatch[T](_AssertResultsMatch[T]):
     def __call__(self, current_result: T, /, suffix: str = "") -> None:
         __tracebackhide__ = True
 
-        dumper = self.dumper or select_json_dumper_from(current_result)
+        dumper = self.dumper or select_json_dumper(current_result)
         storage = self.storage
 
         current_bytes = dumper.dump(current_result)
@@ -96,6 +96,8 @@ class AssertResultsMatchGroup[T](_AssertResultsMatch[T]):
         exc_value: BaseException | None,
         traceback: TracebackType | None,
     ) -> None:
+        __tracebackhide__ = True
+
         if exceptions := self.__exceptions:
             raise (
                 exceptions[0]
