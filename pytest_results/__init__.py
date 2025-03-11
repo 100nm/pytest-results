@@ -3,7 +3,7 @@ from ._core.asserts import (
     AssertResultsMatchGroup,
     AssertResultsMatchType,
 )
-from ._core.dumpers.abc import Dumper, JSONDumper
+from ._core.dumpers.abc import Dumper
 from ._core.storages.abc import Storage
 from ._core.storages.local import LocalStorage
 
@@ -12,7 +12,6 @@ __all__ = (
     "AssertResultsMatchGroup",
     "AssertResultsMatchType",
     "Dumper",
-    "JSONDumper",
     "Storage",
     "LocalStorage",
 )

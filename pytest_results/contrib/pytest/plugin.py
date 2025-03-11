@@ -12,7 +12,7 @@ from functools import update_wrapper
 from inspect import iscoroutinefunction
 from pathlib import Path
 from tempfile import TemporaryDirectory
-from typing import Any, ClassVar
+from typing import Any, ClassVar, ContextManager
 
 import pytest
 
@@ -188,7 +188,7 @@ def __iter_nested_exceptions[T: Exception](
 
 def get_assert_results_match_fixture(
     pyfuncitem: pytest.Function,
-) -> AssertResultsMatchGroup[Any]:
+) -> ContextManager[AssertResultsMatchType]:
     fixture_name = assert_results_match.__name__
     return pyfuncitem._request.getfixturevalue(fixture_name)
 
