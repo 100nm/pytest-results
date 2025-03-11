@@ -30,6 +30,8 @@ class AssertResultsMatch[T](_AssertResultsMatch[T]):
     dumper: Dumper[T] | None = field(default=None)
 
     def __call__(self, current_result: T, /, file_suffix: str = "") -> None:
+        __tracebackhide__ = True
+
         dumper = self.dumper or select_dumper_from(current_result)
         storage = self.storage
 
