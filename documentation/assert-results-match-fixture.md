@@ -29,8 +29,7 @@ def test_function() -> ...:
 > `result` must be a Python object serializable to JSON or an instance of Pydantic 
 > `BaseModel`.
 
-If `assert_results_match` is called several times in a test, a suffix must be added to
-differentiate the results to be checked:
+It is possible to call `assert_results_match` several times in the same test:
 
 ```python
 from pytest_results import AssertResultsMatchType
@@ -38,5 +37,5 @@ from pytest_results import AssertResultsMatchType
 def test_function(assert_results_match: AssertResultsMatchType) -> None:
     for i in range(...):
         result = ...
-        assert_results_match(result, file_suffix=f"-{i}")
+        assert_results_match(result)
 ```
