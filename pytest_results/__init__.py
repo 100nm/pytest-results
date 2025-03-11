@@ -1,13 +1,16 @@
-from ._core.dump_functions.json import json_dump as _json_dump
-from ._core.regression import Regression, RegressionGroup, RegressionType
-from ._core.storages.abc import Storage
-from ._core.storages.local import LocalStorage
+from ._core.regression import BoundedRegression, Regression
+from ._core.regression import CommandRunner as _CommandRunner
+from ._core.regression import RegressionImpl as _RegressionImpl
+from ._core.regression import RegressionStack as _RegressionStack
+from ._core.storages.abc import Storage as _Storage
+from ._core.storages.local import LocalStorage as _LocalStorage
 
 __all__ = (
-    "LocalStorage",
+    "BoundedRegression",
     "Regression",
-    "RegressionGroup",
-    "RegressionType",
-    "Storage",
-    "_json_dump",
+    "_CommandRunner",
+    "_LocalStorage",
+    "_RegressionImpl",
+    "_RegressionStack",
+    "_Storage",
 )
