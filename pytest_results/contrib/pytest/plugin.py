@@ -12,16 +12,11 @@ from functools import update_wrapper
 from inspect import iscoroutinefunction
 from pathlib import Path
 from tempfile import TemporaryDirectory
-from typing import Any, ClassVar, ContextManager
+from typing import Any, ClassVar
 
 import pytest
 
-from pytest_results import (
-    AssertResultsMatch,
-    AssertResultsMatchGroup,
-    AssertResultsMatchType,
-    LocalStorage,
-)
+from pytest_results import LocalStorage, Regression, RegressionGroup, _json_dump
 from pytest_results.exceptions import ResultsMismatchError
 
 __all__ = ()
@@ -40,8 +35,8 @@ class PytestResultsConfig:
         self.__config = pytest_config
 
     @property
-    def accept_all_diff(self) -> bool:
-        return self.__config.getoption("accept_all_diff")
+    def accept_diff(self) -> bool:
+        return self.__config.getoption("accept_diff")
 
     @property
     def diff_command(self) -> str | None:
@@ -68,8 +63,8 @@ def pytest_addoption(parser: pytest.Parser) -> None:
     group = parser.getgroup("pytest-results")
 
     group.addoption(
-        "--accept-all-diff",
-        dest="accept_all_diff",
+        "--accept-diff",
+        dest="accept_diff",
         action="store_true",
         help="Parameter for accepting new differences between results.",
         default=False,
@@ -143,14 +138,15 @@ def _pytest_results_tmpdir() -> Iterator[Path]:
 
 
 @pytest.fixture(scope="function")
-def assert_results_match(
+def regression(
     request: pytest.FixtureRequest,
     _pytest_results_tmpdir: Path,
-) -> AssertResultsMatchType:
+) -> RegressionGroup[Any]:
     results_dir = request.config.rootpath / "__pytest_results__"
     storage = LocalStorage(results_dir, _pytest_results_tmpdir)
-    assert_function: AssertResultsMatchType = AssertResultsMatch(request, storage)
-    return AssertResultsMatchGroup(assert_function)
+    testinfo = tuple(__iter_testinfo(request))
+    regression = Regression(_json_dump, "json", storage, testinfo)
+    return RegressionGroup(regression)
 
 
 def __autodetect_result(pyfuncitem: pytest.Function) -> pytest.Function:
@@ -160,16 +156,16 @@ def __autodetect_result(pyfuncitem: pytest.Function) -> pytest.Function:
     if iscoroutinefunction(wrapped):
 
         async def wrapper(*args: Any, **kwargs: Any) -> None:
-            with get_assert_results_match_fixture(pyfuncitem) as assert_function:
+            with __get_regression_fixture(pyfuncitem) as regression:
                 if (result := await wrapped(*args, **kwargs)) is not None:
-                    assert_function(result)
+                    regression.check(result)
 
     else:
 
         def wrapper(*args: Any, **kwargs: Any) -> None:
-            with get_assert_results_match_fixture(pyfuncitem) as assert_function:
+            with __get_regression_fixture(pyfuncitem) as regression:
                 if (result := wrapped(*args, **kwargs)) is not None:
-                    assert_function(result)
+                    regression.check(result)
 
     pyfuncitem.obj = update_wrapper(wrapper, wrapped)
     return pyfuncitem
@@ -186,11 +182,17 @@ def __iter_nested_exceptions[T: Exception](
         yield exception
 
 
-def get_assert_results_match_fixture(
-    pyfuncitem: pytest.Function,
-) -> ContextManager[AssertResultsMatchType]:
-    fixture_name = assert_results_match.__name__
-    return pyfuncitem._request.getfixturevalue(fixture_name)
+def __iter_testinfo(request: pytest.FixtureRequest) -> Iterator[str]:
+    yield from request.module.__name__.split(".")
+
+    if cls := request.cls:
+        yield cls.__name__
+
+    yield request.function.__name__
+
+
+def __get_regression_fixture(pyfuncitem: pytest.Function) -> RegressionGroup[Any]:
+    return pyfuncitem._request.getfixturevalue(regression.__name__)
 
 
 def __on_mismatches(
@@ -202,7 +204,7 @@ def __on_mismatches(
 
     config = PytestResultsConfig(pytest_config)
 
-    if config.accept_all_diff:
+    if config.accept_diff:
         for mismatch in mismatches:
             mismatch.accept_diff()
 
