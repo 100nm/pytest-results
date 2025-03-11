@@ -6,7 +6,7 @@ from pytest_results._core.dumpers.json import SimpleJSONDumper
 
 
 @singledispatch
-def select_dumper_from(value: Any) -> Dumper[Any]:
+def select_json_dumper_from(value: Any) -> Dumper[Any]:
     return SimpleJSONDumper()
 
 
@@ -17,6 +17,6 @@ except ImportError:  # pragma: no cover
 else:
     from pytest_results._core.dumpers.pydantic import PydanticJSONDumper
 
-    @select_dumper_from.register
+    @select_json_dumper_from.register
     def _(value: BaseModel) -> Dumper[BaseModel]:
         return PydanticJSONDumper()

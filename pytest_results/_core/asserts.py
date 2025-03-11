@@ -7,7 +7,7 @@ from typing import Any, Protocol, Self, runtime_checkable
 import pytest
 
 from pytest_results._core.dumpers.abc import Dumper
-from pytest_results._core.select_dumper import select_dumper_from
+from pytest_results._core.select_dumper import select_json_dumper_from
 from pytest_results._core.storages.abc import Storage
 from pytest_results.exceptions import ResultsMismatchError
 
@@ -19,7 +19,7 @@ class _AssertResultsMatch[T](Protocol):
     __slots__ = ()
 
     @abstractmethod
-    def __call__(self, current_result: T, /, file_suffix: str = ...) -> None:
+    def __call__(self, current_result: T, /, suffix: str = ...) -> None:
         raise NotImplementedError
 
 
@@ -29,16 +29,16 @@ class AssertResultsMatch[T](_AssertResultsMatch[T]):
     storage: Storage
     dumper: Dumper[T] | None = field(default=None)
 
-    def __call__(self, current_result: T, /, file_suffix: str = "") -> None:
+    def __call__(self, current_result: T, /, suffix: str = "") -> None:
         __tracebackhide__ = True
 
-        dumper = self.dumper or select_dumper_from(current_result)
+        dumper = self.dumper or select_json_dumper_from(current_result)
         storage = self.storage
 
         current_bytes = dumper.dump(current_result)
         relative_filepath = self.__get_relative_result_filepath(
             dumper.file_format,
-            file_suffix,
+            suffix,
         )
         filepath = storage.get_absolute_path(relative_filepath)
         previous_bytes = storage.read(filepath)
@@ -74,16 +74,16 @@ class AssertResultsMatchGroup[T](_AssertResultsMatch[T]):
         self.__count = 0
         self.__exceptions = []
 
-    def __call__(self, current_result: T, /, file_suffix: str = "") -> None:
+    def __call__(self, current_result: T, /, suffix: str = "") -> None:
         __tracebackhide__ = True
 
-        if not file_suffix and (count := self.__count) > 0:
-            file_suffix = f"_{count}"
+        if not suffix and (count := self.__count) > 0:
+            suffix = f"_{count}"
 
         self.__count += 1
 
         try:
-            return self.__call(current_result, file_suffix)
+            return self.__call(current_result, suffix)
         except ResultsMismatchError as exc:
             self.__exceptions.append(exc)
 
