@@ -1,5 +1,5 @@
 import warnings
-from collections.abc import Awaitable, Callable, Generator, Iterator, Mapping
+from collections.abc import Awaitable, Callable, Generator, Iterable, Iterator, Mapping
 from functools import update_wrapper
 from inspect import iscoroutinefunction
 from pathlib import Path
@@ -93,11 +93,11 @@ def pytest_addoption(parser: pytest.Parser) -> None:
     )
 
 
-@pytest.hookimpl(trylast=True)
-def pytest_collection_modifyitems(items: list[pytest.Item]) -> None:
+@pytest.hookimpl(tryfirst=True)
+def pytest_collection_modifyitems(items: Iterable[pytest.Item]) -> None:
     for item in items:
         if isinstance(item, pytest.Function):
-            item.obj = __make_autodetect_result(item)
+            __autodetect_result(item)
 
 
 @pytest.hookimpl(trylast=True, wrapper=True)
@@ -139,11 +139,8 @@ def assert_results_match(
     return AssertResultsMatch(request, storage)
 
 
-type _Null = None | Awaitable[None]
-
-
-def __make_autodetect_result(pyfuncitem: pytest.Function) -> Callable[..., _Null]:
-    wrapper: Callable[..., _Null]
+def __autodetect_result(pyfuncitem: pytest.Function) -> pytest.Function:
+    wrapper: Callable[..., None | Awaitable[None]]
     wrapped = pyfuncitem.obj
 
     if iscoroutinefunction(wrapped):
@@ -158,7 +155,8 @@ def __make_autodetect_result(pyfuncitem: pytest.Function) -> Callable[..., _Null
             result = wrapped(*args, **kwargs)
             __run_assert_results_match(result, pyfuncitem)
 
-    return update_wrapper(wrapper, wrapped)
+    pyfuncitem.obj = update_wrapper(wrapper, wrapped)
+    return pyfuncitem
 
 
 def __run_assert_results_match[T](result: T, pyfuncitem: pytest.Function) -> T:

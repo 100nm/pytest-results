@@ -25,9 +25,6 @@ def test_function():
     return {"hello": "world"}
 ```
 
-> [!NOTE]
-> The returned value must be serializable.
-
 All results are stored in JSON files at the root of your project in the
 `__pytest_results__` folder.
 
