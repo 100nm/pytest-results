@@ -3,7 +3,7 @@ from __future__ import annotations
 from pathlib import Path
 from typing import TYPE_CHECKING
 
-if TYPE_CHECKING:
+if TYPE_CHECKING:  # pragma: no cover
     from pytest_results import _CommandRunner, _Storage
 
 __all__ = ("PytestResultsError", "ResultsMismatchError")
@@ -27,10 +27,10 @@ class ResultsMismatchError(AssertionError, PytestResultsError):
 
     def __init__(
         self,
-        command_runner: _CommandRunner,
         current: Path,
         previous: Path,
         storage: _Storage,
+        command_runner: _CommandRunner,
     ) -> None:
         self.__command_runner = command_runner
         self.__current_filepath = current

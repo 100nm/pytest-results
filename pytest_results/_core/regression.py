@@ -1,11 +1,10 @@
 from abc import abstractmethod
 from collections.abc import Callable, Sequence
-from dataclasses import dataclass, field
+from dataclasses import dataclass
 from pathlib import Path
 from types import TracebackType
 from typing import Any, Final, Protocol, Self, runtime_checkable
 
-from pytest_results._core.command_runners.sh import run_sh_command
 from pytest_results._core.dump_functions.json import json_dump
 from pytest_results._core.storages.abc import Storage
 from pytest_results.exceptions import ResultsMismatchError
@@ -58,9 +57,9 @@ class BoundedRegression(Regression):
 
 @dataclass(repr=False, eq=False, frozen=True, slots=True)
 class RegressionImpl(Regression):
-    storage: Storage
     testinfo: Sequence[str]
-    command_runner: CommandRunner = field(default=run_sh_command)
+    storage: Storage
+    command_runner: CommandRunner
 
     def check[T](
         self,
@@ -88,10 +87,10 @@ class RegressionImpl(Regression):
             temporary_filepath = self.storage.get_temporary_path(relative_filepath)
             self.storage.write(temporary_filepath, current_bytes)
             raise ResultsMismatchError(
-                command_runner=self.command_runner,
                 current=temporary_filepath,
                 previous=filepath,
                 storage=self.storage,
+                command_runner=self.command_runner,
             ) from exc
 
     def __get_relative_result_filepath(self, file_format: str, suffix: str) -> Path:

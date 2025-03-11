@@ -1,3 +1,5 @@
+import os
+import time
 import warnings
 from collections.abc import (
     Awaitable,
@@ -135,6 +137,8 @@ def pytest_pyfunc_call(
 def _pytest_results_tmpdir() -> Iterator[Path]:
     with TemporaryDirectory(prefix="pytest-temporary-results@") as tmpdir:
         yield Path(tmpdir)
+        # if the diff command isn't blocking, the directory may be deleted too quickly
+        time.sleep(0.5)
 
 
 @pytest.fixture(scope="function")
@@ -142,10 +146,10 @@ def regression(
     request: pytest.FixtureRequest,
     _pytest_results_tmpdir: Path,
 ) -> _RegressionStack:
+    testinfo = tuple(__iter_testinfo(request))
     results_dir = request.config.rootpath / "__pytest_results__"
     storage = _LocalStorage(results_dir, _pytest_results_tmpdir)
-    testinfo = tuple(__iter_testinfo(request))
-    delegate = _RegressionImpl(storage, testinfo)
+    delegate = _RegressionImpl(testinfo, storage, os.system)
     return _RegressionStack(delegate)
 
 

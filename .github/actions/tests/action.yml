@@ -6,4 +6,6 @@ runs:
   steps:
     - name: Pytest
       shell: bash
-      run: uv run pytest
+      run: |
+        uv run coverage run -m pytest
+        uv run coverage report -m --skip-covered
