@@ -1,0 +1,3 @@
+{
+  "__str__": "Results mismatch\n・Current: `/tmp/tests/test_exceptions/TestResultsMismatchError/test_str_with_success_return_str.json`\n・Previous: `/root/tests/test_exceptions/TestResultsMismatchError/test_str_with_success_return_str.json`"
+}

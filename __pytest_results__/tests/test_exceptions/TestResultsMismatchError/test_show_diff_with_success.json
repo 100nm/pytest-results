@@ -1,0 +1,5 @@
+{
+  "commands": [
+    "code -d -r -w /tmp/tests/test_exceptions/TestResultsMismatchError/test_show_diff_with_success.json /root/tests/test_exceptions/TestResultsMismatchError/test_show_diff_with_success.json"
+  ]
+}

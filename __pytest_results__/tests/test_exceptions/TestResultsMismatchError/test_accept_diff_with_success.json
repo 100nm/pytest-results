@@ -1,0 +1,4 @@
+{
+  "/tmp/tests/test_exceptions/TestResultsMismatchError/test_accept_diff_with_success.json": "{}",
+  "/root/tests/test_exceptions/TestResultsMismatchError/test_accept_diff_with_success.json": "{}"
+}

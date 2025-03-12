@@ -1,14 +1,6 @@
 import os
 import warnings
-from collections.abc import (
-    Awaitable,
-    Callable,
-    Generator,
-    Iterable,
-    Iterator,
-    Mapping,
-    Sequence,
-)
+from collections.abc import Awaitable, Callable, Generator, Iterable, Mapping, Sequence
 from functools import update_wrapper
 from inspect import iscoroutinefunction
 from pathlib import Path
@@ -17,6 +9,7 @@ from typing import Any, ClassVar
 import pytest
 
 from pytest_results import _LocalStorage, _RegressionImpl, _RegressionStack
+from pytest_results._utils import get_testinfo, iter_nested_exceptions
 from pytest_results.exceptions import ResultsMismatchError
 
 __all__ = ()
@@ -123,7 +116,7 @@ def pytest_pyfunc_call(
 
     except ExceptionGroup as exc_group:
         if sub_exc_group := exc_group.subgroup(ResultsMismatchError):
-            mismatches = tuple(__iter_nested_exceptions(sub_exc_group))
+            mismatches = tuple(iter_nested_exceptions(sub_exc_group))
             __on_mismatches(mismatches, pyfuncitem.config)
 
         raise exc_group
@@ -134,11 +127,8 @@ def pytest_pyfunc_call(
 @pytest.fixture(scope="function")
 def regression(request: pytest.FixtureRequest, tmp_path: Path) -> _RegressionStack:
     dirname = "__pytest_results__"
-    storage = _LocalStorage(
-        request.config.rootpath / dirname,
-        tmp_path / dirname,
-    )
-    testinfo = tuple(__iter_testinfo(request))
+    storage = _LocalStorage(request.config.rootpath / dirname, tmp_path / dirname)
+    testinfo = get_testinfo(request)
     delegate = _RegressionImpl(testinfo, storage, os.system)
     return _RegressionStack(delegate)
 
@@ -163,26 +153,6 @@ def __autodetect_result(pyfuncitem: pytest.Function) -> pytest.Function:
 
     pyfuncitem.obj = update_wrapper(wrapper, wrapped)
     return pyfuncitem
-
-
-def __iter_nested_exceptions[T: Exception](
-    exception_group: ExceptionGroup[T],
-) -> Iterator[T]:
-    for exception in exception_group.exceptions:
-        if isinstance(exception, ExceptionGroup):
-            yield from __iter_nested_exceptions(exception)
-            continue
-
-        yield exception
-
-
-def __iter_testinfo(request: pytest.FixtureRequest) -> Iterator[str]:
-    yield from request.module.__name__.split(".")
-
-    if cls := request.cls:
-        yield cls.__name__
-
-    yield request.function.__name__
 
 
 def __get_regression_fixture(pyfuncitem: pytest.Function) -> _RegressionStack:
