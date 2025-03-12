@@ -26,7 +26,7 @@ class Regression(Protocol):
         current_result: T,
         /,
         suffix: str | None = ...,
-        dump: DumpFunction[T] | None = ...,
+        dump_func: DumpFunction[T] | None = ...,
         file_format: str | None = ...,
     ) -> None:
         raise NotImplementedError
@@ -35,7 +35,7 @@ class Regression(Protocol):
 @dataclass(repr=False, eq=False, frozen=True, slots=True)
 class BoundedRegression(Regression):
     regression: Regression
-    dump: DumpFunction[Any]
+    dump_func: DumpFunction[Any]
     file_format: str
 
     def check[T](
@@ -43,14 +43,14 @@ class BoundedRegression(Regression):
         current_result: T,
         /,
         suffix: str | None = None,
-        dump: DumpFunction[T] | None = None,
+        dump_func: DumpFunction[T] | None = None,
         file_format: str | None = None,
     ) -> None:
         __tracebackhide__ = True
         return self.regression.check(
             current_result,
             suffix,
-            dump or self.dump,
+            dump_func or self.dump_func,
             file_format or self.file_format,
         )
 
@@ -66,16 +66,16 @@ class RegressionImpl(Regression):
         current_result: T,
         /,
         suffix: str | None = None,
-        dump: DumpFunction[T] | None = None,
+        dump_func: DumpFunction[T] | None = None,
         file_format: str | None = None,
     ) -> None:
         __tracebackhide__ = True
 
-        dump = dump or _DEFAULT_DUMP_FUNCTION
+        dump_func = dump_func or _DEFAULT_DUMP_FUNCTION
         file_format = file_format or _DEFAULT_FILE_FORMAT
         suffix = suffix or ""
 
-        current_bytes = dump(current_result)
+        current_bytes = dump_func(current_result)
         relative_filepath = self.__get_relative_result_filepath(file_format, suffix)
         filepath = self.storage.get_absolute_path(relative_filepath)
         previous_bytes = self.storage.read(filepath)
@@ -134,7 +134,7 @@ class RegressionStack(Regression):
         current_result: T,
         /,
         suffix: str | None = None,
-        dump: DumpFunction[T] | None = None,
+        dump_func: DumpFunction[T] | None = None,
         file_format: str | None = None,
     ) -> None:
         __tracebackhide__ = True
@@ -145,6 +145,6 @@ class RegressionStack(Regression):
         self.__count += 1
 
         try:
-            return self.__delegate.check(current_result, suffix, dump, file_format)
+            return self.__delegate.check(current_result, suffix, dump_func, file_format)
         except ResultsMismatchError as mismatch:
             self.__mismatches.append(mismatch)

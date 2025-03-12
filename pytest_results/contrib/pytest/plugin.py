@@ -1,5 +1,4 @@
 import os
-import time
 import warnings
 from collections.abc import (
     Awaitable,
@@ -13,7 +12,6 @@ from collections.abc import (
 from functools import update_wrapper
 from inspect import iscoroutinefunction
 from pathlib import Path
-from tempfile import TemporaryDirectory
 from typing import Any, ClassVar
 
 import pytest
@@ -133,22 +131,14 @@ def pytest_pyfunc_call(
     return result
 
 
-@pytest.fixture(scope="session")
-def _pytest_results_tmpdir() -> Iterator[Path]:
-    with TemporaryDirectory(prefix="pytest-temporary-results@") as tmpdir:
-        yield Path(tmpdir)
-        # if the diff command isn't blocking, the directory may be deleted too quickly
-        time.sleep(0.5)
-
-
 @pytest.fixture(scope="function")
-def regression(
-    request: pytest.FixtureRequest,
-    _pytest_results_tmpdir: Path,
-) -> _RegressionStack:
+def regression(request: pytest.FixtureRequest, tmp_path: Path) -> _RegressionStack:
+    dirname = "__pytest_results__"
+    storage = _LocalStorage(
+        request.config.rootpath / dirname,
+        tmp_path / dirname,
+    )
     testinfo = tuple(__iter_testinfo(request))
-    results_dir = request.config.rootpath / "__pytest_results__"
-    storage = _LocalStorage(results_dir, _pytest_results_tmpdir)
     delegate = _RegressionImpl(testinfo, storage, os.system)
     return _RegressionStack(delegate)
 

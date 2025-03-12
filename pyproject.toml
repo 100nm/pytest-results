@@ -86,6 +86,8 @@ addopts = "--tb short"
 asyncio_default_fixture_loop_scope = "session"
 asyncio_mode = "auto"
 testpaths = "**/tests/"
+tmp_path_retention_count = 1
+tmp_path_retention_policy = "failed"
 
 [tool.ruff]
 line-length = 88
