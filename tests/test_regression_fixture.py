@@ -3,7 +3,7 @@ from pydantic import BaseModel
 from pytest_results import Regression
 
 
-class TestRegression:
+class TestRegressionFixture:
     def test_check_with_success(self) -> dict[str, str]:
         return {"title": "Hello, World!"}
 

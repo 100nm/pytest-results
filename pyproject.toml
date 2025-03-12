@@ -10,8 +10,8 @@ dev = [
     "ruff",
 ]
 test = [
+    "coverage",
     "pytest-asyncio",
-    "pytest-cov",
 ]
 
 [project]
@@ -82,10 +82,12 @@ warn_required_dynamic_aliases = true
 
 [tool.pytest.ini_options]
 python_files = "test_*.py"
-addopts = "--tb short --cov ./ --cov-report term-missing:skip-covered"
+addopts = "--tb short"
 asyncio_default_fixture_loop_scope = "session"
 asyncio_mode = "auto"
 testpaths = "**/tests/"
+tmp_path_retention_count = 1
+tmp_path_retention_policy = "failed"
 
 [tool.ruff]
 line-length = 88

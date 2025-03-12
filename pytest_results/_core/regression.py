@@ -1,11 +1,10 @@
 from abc import abstractmethod
 from collections.abc import Callable, Sequence
-from dataclasses import dataclass, field
+from dataclasses import dataclass
 from pathlib import Path
 from types import TracebackType
 from typing import Any, Final, Protocol, Self, runtime_checkable
 
-from pytest_results._core.command_runners.sh import run_sh_command
 from pytest_results._core.dump_functions.json import json_dump
 from pytest_results._core.storages.abc import Storage
 from pytest_results.exceptions import ResultsMismatchError
@@ -27,7 +26,7 @@ class Regression(Protocol):
         current_result: T,
         /,
         suffix: str | None = ...,
-        dump: DumpFunction[T] | None = ...,
+        dump_func: DumpFunction[T] | None = ...,
         file_format: str | None = ...,
     ) -> None:
         raise NotImplementedError
@@ -36,7 +35,7 @@ class Regression(Protocol):
 @dataclass(repr=False, eq=False, frozen=True, slots=True)
 class BoundedRegression(Regression):
     regression: Regression
-    dump: DumpFunction[Any]
+    dump_func: DumpFunction[Any]
     file_format: str
 
     def check[T](
@@ -44,39 +43,39 @@ class BoundedRegression(Regression):
         current_result: T,
         /,
         suffix: str | None = None,
-        dump: DumpFunction[T] | None = None,
+        dump_func: DumpFunction[T] | None = None,
         file_format: str | None = None,
     ) -> None:
         __tracebackhide__ = True
         return self.regression.check(
             current_result,
             suffix,
-            dump or self.dump,
+            dump_func or self.dump_func,
             file_format or self.file_format,
         )
 
 
 @dataclass(repr=False, eq=False, frozen=True, slots=True)
 class RegressionImpl(Regression):
-    storage: Storage
     testinfo: Sequence[str]
-    command_runner: CommandRunner = field(default=run_sh_command)
+    storage: Storage
+    command_runner: CommandRunner
 
     def check[T](
         self,
         current_result: T,
         /,
         suffix: str | None = None,
-        dump: DumpFunction[T] | None = None,
+        dump_func: DumpFunction[T] | None = None,
         file_format: str | None = None,
     ) -> None:
         __tracebackhide__ = True
 
-        dump = dump or _DEFAULT_DUMP_FUNCTION
+        dump_func = dump_func or _DEFAULT_DUMP_FUNCTION
         file_format = file_format or _DEFAULT_FILE_FORMAT
         suffix = suffix or ""
 
-        current_bytes = dump(current_result)
+        current_bytes = dump_func(current_result)
         relative_filepath = self.__get_relative_result_filepath(file_format, suffix)
         filepath = self.storage.get_absolute_path(relative_filepath)
         previous_bytes = self.storage.read(filepath)
@@ -88,10 +87,10 @@ class RegressionImpl(Regression):
             temporary_filepath = self.storage.get_temporary_path(relative_filepath)
             self.storage.write(temporary_filepath, current_bytes)
             raise ResultsMismatchError(
-                command_runner=self.command_runner,
                 current=temporary_filepath,
                 previous=filepath,
                 storage=self.storage,
+                command_runner=self.command_runner,
             ) from exc
 
     def __get_relative_result_filepath(self, file_format: str, suffix: str) -> Path:
@@ -135,7 +134,7 @@ class RegressionStack(Regression):
         current_result: T,
         /,
         suffix: str | None = None,
-        dump: DumpFunction[T] | None = None,
+        dump_func: DumpFunction[T] | None = None,
         file_format: str | None = None,
     ) -> None:
         __tracebackhide__ = True
@@ -146,6 +145,6 @@ class RegressionStack(Regression):
         self.__count += 1
 
         try:
-            return self.__delegate.check(current_result, suffix, dump, file_format)
+            return self.__delegate.check(current_result, suffix, dump_func, file_format)
         except ResultsMismatchError as mismatch:
             self.__mismatches.append(mismatch)
