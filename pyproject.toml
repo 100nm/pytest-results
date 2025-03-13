@@ -5,6 +5,7 @@ build-backend = "hatchling.build"
 [dependency-groups]
 dev = [
     "hatch",
+    "msgspec",
     "mypy",
     "pydantic",
     "ruff",

@@ -26,8 +26,11 @@ def test_function() -> ...:
 ```
 
 > [!NOTE]
-> `result` must be a Python object serializable to JSON or an instance of Pydantic 
-> `BaseModel`.
+> Supported `result` types:
+> * Python serializable objects in JSON
+> * bytes (directly for JSON file)
+> * [pydantic.BaseModel](https://github.com/pydantic/pydantic)
+> * [msgspec.Struct](https://github.com/jcrist/msgspec)
 
 It is possible to call `regression.check` several times in the same test:
 
