@@ -2,7 +2,7 @@ from typing import Any
 
 import pytest
 
-from pytest_results import BoundedRegression, Regression, _RegressionStack
+from pytest_results import BoundRegression, Regression, _RegressionStack
 from pytest_results.exceptions import ResultsMismatchError
 from tests.testing_impl.storage import MemoryStorage
 
@@ -30,13 +30,13 @@ class TestRegression:
         return memory_storage.json_memory
 
 
-class TestBoundedRegression:
+class TestBoundRegression:
     def test_check_with_success(
         self,
         test_regression: Regression,
         memory_storage: MemoryStorage,
     ) -> dict[str, str]:
-        regression = BoundedRegression(
+        regression = BoundRegression(
             test_regression,
             dump_func=_fake_yaml_dump,
             file_format="yml",
@@ -53,7 +53,7 @@ class TestBoundedRegression:
         test_regression: Regression,
         memory_storage: MemoryStorage,
     ) -> dict[str, str]:
-        regression = BoundedRegression(
+        regression = BoundRegression(
             test_regression,
             dump_func=_fake_yaml_dump,
             file_format="yml",

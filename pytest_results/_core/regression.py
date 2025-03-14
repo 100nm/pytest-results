@@ -33,7 +33,7 @@ class Regression(Protocol):
 
 
 @dataclass(repr=False, eq=False, frozen=True, slots=True)
-class BoundedRegression(Regression):
+class BoundRegression(Regression):
     regression: Regression
     dump_func: DumpFunction[Any]
     file_format: str

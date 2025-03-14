@@ -6,7 +6,7 @@
 
 Easily spot regressions in your tests.
 
-The package lets you write non-regression tests.
+[Pytest](https://github.com/pytest-dev/pytest) plugin for writing non-regression tests.
 
 ## Installation
 
