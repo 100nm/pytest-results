@@ -42,3 +42,23 @@ def test_function(regression: Regression) -> None:
         result = ...
         regression.check(result)
 ```
+
+## Custom regression fixture
+
+Here's how to write a custom regression fixture:
+
+```python
+# conftest.py
+
+from typing import Any
+
+import pytest
+from pytest_results import BoundRegression, Regression
+
+def _yaml_dump(value: Any) -> bytes:
+    """ Python to yaml """
+
+@pytest.fixture
+def regression_yaml(regression: Regression) -> Regression:
+    return BoundRegression(regression, dump_func=_yaml_dump, file_format="yml")
+```
