@@ -9,7 +9,8 @@ from typing import Any, ClassVar
 import pytest
 
 from pytest_results import _LocalStorage, _RegressionImpl, _RegressionStack
-from pytest_results._utils import get_testinfo, iter_nested_exceptions
+from pytest_results._exc_group import iter_nested_exceptions
+from pytest_results._testinfo import get_testinfo
 from pytest_results.exceptions import ResultsMismatchError
 
 __all__ = ()

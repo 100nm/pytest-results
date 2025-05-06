@@ -1,7 +1,7 @@
 import pytest
 
 from pytest_results import Regression, _RegressionImpl, _RegressionStack
-from pytest_results._utils import get_testinfo
+from pytest_results._testinfo import get_testinfo
 from tests.testing_impl.command_runner import CommandRunnerHistory
 from tests.testing_impl.storage import MemoryStorage
 
