@@ -113,14 +113,14 @@ def pytest_pyfunc_call(
 
     except ResultsMismatchError as mismatch:
         __on_mismatches((mismatch,), pyfuncitem.config)
-        raise mismatch
+        raise
 
     except ExceptionGroup as exc_group:
         if sub_exc_group := exc_group.subgroup(ResultsMismatchError):
             mismatches = tuple(iter_nested_exceptions(sub_exc_group))
             __on_mismatches(mismatches, pyfuncitem.config)
 
-        raise exc_group
+        raise
 
     return result
 
