@@ -66,15 +66,34 @@ class TestBoundRegression:
 
 
 class TestRegressionStack:
-    def test_check_with_failure(
+    def test_close_with_success(
+        self,
+        test_regression_stack: _RegressionStack,
+    ) -> None:
+        test_regression_stack.close()
+
+    def test_close_with_one_mismatch(
         self,
         test_regression_stack: _RegressionStack,
         memory_storage: MemoryStorage,
     ) -> dict[str, str]:
+        test_regression_stack.check({"hello": 1})
+
+        with pytest.raises(ResultsMismatchError):
+            test_regression_stack.close()
+
+        return memory_storage.json_memory
+
+    def test_close_with_several_mismatches(
+        self,
+        test_regression_stack: _RegressionStack,
+        memory_storage: MemoryStorage,
+    ) -> dict[str, str]:
+        test_regression_stack.check({"hello": 1})
+        test_regression_stack.check({"hello": 2})
+        test_regression_stack.check({"hello": 3})
+
         with pytest.raises(ExceptionGroup):
-            with test_regression_stack:
-                test_regression_stack.check({"hello": 1})
-                test_regression_stack.check({"hello": 2})
-                test_regression_stack.check({"hello": 3})
+            test_regression_stack.close()
 
         return memory_storage.json_memory
