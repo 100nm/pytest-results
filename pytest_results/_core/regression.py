@@ -2,8 +2,7 @@ from abc import abstractmethod
 from collections.abc import Callable, Sequence
 from dataclasses import dataclass
 from pathlib import Path
-from types import TracebackType
-from typing import Any, Final, Protocol, Self, runtime_checkable
+from typing import Any, Final, Protocol, runtime_checkable
 
 from pytest_results._core.dump_functions.json import json_dump
 from pytest_results._core.storages.abc import Storage
@@ -111,24 +110,6 @@ class RegressionStack(Regression):
         self.__delegate = delegate
         self.__mismatches = []
 
-    def __enter__(self) -> Self:
-        return self
-
-    def __exit__(
-        self,
-        exc_type: type[BaseException] | None,
-        exc_value: BaseException | None,
-        traceback: TracebackType | None,
-    ) -> None:
-        __tracebackhide__ = True
-
-        if mismatches := self.__mismatches:
-            raise (
-                mismatches[0]
-                if len(mismatches) == 1
-                else ExceptionGroup("", mismatches)
-            )
-
     def check[T](
         self,
         current_result: T,
@@ -148,3 +129,17 @@ class RegressionStack(Regression):
             return self.__delegate.check(current_result, suffix, dump_func, file_format)
         except ResultsMismatchError as mismatch:
             self.__mismatches.append(mismatch)
+
+    def close(self) -> None:
+        __tracebackhide__ = True
+
+        mismatches = tuple(self.__mismatches)
+        self.__mismatches.clear()
+
+        match len(mismatches):
+            case 0:
+                ...
+            case 1:
+                raise mismatches[0]
+            case _:
+                raise ExceptionGroup("", mismatches)

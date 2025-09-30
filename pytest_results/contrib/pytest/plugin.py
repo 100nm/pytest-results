@@ -1,7 +1,7 @@
 import os
 import warnings
-from collections.abc import Awaitable, Callable, Generator, Iterable, Mapping, Sequence
-from functools import update_wrapper
+from collections.abc import Generator, Iterable, Mapping, Sequence
+from functools import wraps
 from inspect import iscoroutinefunction
 from pathlib import Path
 from typing import Any, ClassVar
@@ -135,25 +135,33 @@ def regression(request: pytest.FixtureRequest, tmp_path: Path) -> _RegressionSta
 
 
 def __autodetect_result(pyfuncitem: pytest.Function) -> pytest.Function:
-    wrapper: Callable[..., None | Awaitable[None]]
-    wrapped = pyfuncitem.obj
+    function = pyfuncitem.obj
 
-    if iscoroutinefunction(wrapped):
+    if iscoroutinefunction(function):
 
+        @wraps(function)
         async def wrapper(*args: Any, **kwargs: Any) -> None:
-            with __get_regression_fixture(pyfuncitem) as regression:
-                if (result := await wrapped(*args, **kwargs)) is not None:
-                    regression.check(result)
+            result = await function(*args, **kwargs)
+            __check_result(result, pyfuncitem)
 
     else:
 
+        @wraps(function)
         def wrapper(*args: Any, **kwargs: Any) -> None:
-            with __get_regression_fixture(pyfuncitem) as regression:
-                if (result := wrapped(*args, **kwargs)) is not None:
-                    regression.check(result)
+            result = function(*args, **kwargs)
+            __check_result(result, pyfuncitem)
 
-    pyfuncitem.obj = update_wrapper(wrapper, wrapped)
+    pyfuncitem.obj = wrapper
     return pyfuncitem
+
+
+def __check_result(result: Any, pyfuncitem: pytest.Function) -> None:
+    regression_stack = __get_regression_fixture(pyfuncitem)
+
+    if result is not None:
+        regression_stack.check(result)
+
+    regression_stack.close()
 
 
 def __get_regression_fixture(pyfuncitem: pytest.Function) -> _RegressionStack:

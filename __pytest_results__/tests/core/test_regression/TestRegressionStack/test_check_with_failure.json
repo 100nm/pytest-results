@@ -1,5 +1,0 @@
-{
-  "/tmp/tests/core/test_regression/TestRegressionStack/test_check_with_failure.json": "{\n  \"hello\": 1\n}",
-  "/tmp/tests/core/test_regression/TestRegressionStack/test_check_with_failure_1.json": "{\n  \"hello\": 2\n}",
-  "/tmp/tests/core/test_regression/TestRegressionStack/test_check_with_failure_2.json": "{\n  \"hello\": 3\n}"
-}
