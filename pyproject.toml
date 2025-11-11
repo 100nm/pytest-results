@@ -85,13 +85,13 @@ init_forbid_extra = true
 init_typed = true
 warn_required_dynamic_aliases = true
 
-[tool.pytest.ini_options]
-python_files = "test_*.py"
-addopts = "--tb short"
+[tool.pytest]
+python_files = ["test_*.py"]
+addopts = ["--tb", "short"]
 asyncio_default_fixture_loop_scope = "session"
 asyncio_mode = "auto"
-testpaths = "**/tests/"
-tmp_path_retention_count = 1
+testpaths = ["**/tests/"]
+tmp_path_retention_count = "1"
 tmp_path_retention_policy = "failed"
 
 [tool.ruff]
