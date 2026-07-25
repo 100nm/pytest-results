@@ -11,6 +11,7 @@ Example:
 ```python
 from pytest_results import Regression
 
+
 def test_function(regression: Regression) -> None:
     result = ...
     regression.check(result)
@@ -37,6 +38,7 @@ It is possible to call `regression.check` several times in the same test:
 ```python
 from pytest_results import Regression
 
+
 def test_function(regression: Regression) -> None:
     for i in range(...):
         result = ...
@@ -55,8 +57,10 @@ from typing import Any
 import pytest
 from pytest_results import BoundRegression, Regression
 
+
 def _yaml_dump(value: Any) -> bytes:
-    """ Python to yaml """
+    """Python to yaml"""
+
 
 @pytest.fixture
 def regression_yaml(regression: Regression) -> Regression:
