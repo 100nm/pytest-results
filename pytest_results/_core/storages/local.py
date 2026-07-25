@@ -25,9 +25,8 @@ class LocalStorage(Storage):
         return self.__get_absolute_path(relative_path, self.temporary_dir)
 
     def read(self, filepath: Path) -> bytes:
-        with suppress(FileNotFoundError):
-            with open(filepath, "rb") as reader:
-                return reader.read()
+        with suppress(FileNotFoundError), open(filepath, "rb") as reader:
+            return reader.read()
 
         return b""
 
