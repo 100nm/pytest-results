@@ -1,9 +1,10 @@
 # pytest-results
 
-[![CI](https://github.com/100nm/pytest-results/actions/workflows/ci.yml/badge.svg)](https://github.com/100nm/pytest-results)
-[![PyPI - Version](https://img.shields.io/pypi/v/pytest-results.svg?color=blue)](https://pypi.org/project/pytest-results)
-[![PyPI - Downloads](https://img.shields.io/pypi/dm/pytest-results.svg?color=blue)](https://pypistats.org/packages/pytest-results)
-[![Ruff](https://img.shields.io/endpoint?url=https://raw.githubusercontent.com/astral-sh/ruff/main/assets/badge/v2.json)](https://github.com/astral-sh/ruff)
+[![PyPI - Version](https://shieldcn.dev/pypi/v/pytest-results.svg?color=3775A9&size=xs&variant=secondary)](https://pypi.org/project/pytest-results)
+[![PyPI - Downloads](https://shieldcn.dev/pypi/dm/pytest-results.svg?color=3775A9&size=xs&variant=secondary)](https://pypistats.org/packages/pytest-results)
+[![GitHub Stars](https://shieldcn.dev/github/stars/100nm/pytest-results.svg?size=xs&variant=secondary)](https://github.com/100nm/pytest-results/stargazers)
+[![CI](https://shieldcn.dev/github/ci/100nm/pytest-results.svg?size=xs&variant=secondary&workflow=ci.yml)](https://github.com/100nm/pytest-results/actions/workflows/ci.yml)
+[![Ruff](https://shieldcn.dev/badge/code_style-Ruff-261230.svg?logo=ruff&size=xs&variant=secondary)](https://github.com/astral-sh/ruff)
 
 Easily spot regressions in your tests.
 
