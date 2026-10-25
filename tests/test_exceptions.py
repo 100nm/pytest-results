@@ -1,43 +1,64 @@
-from typing import Any
+from pathlib import Path
 
-from pytest_results import Regression
 from pytest_results.exceptions import ResultsMismatchError
-from tests.testing_impl.command_runner import CommandRunnerHistory
-from tests.testing_impl.storage import MemoryStorage
+from tests.impl.command_runner import CommandRunnerHistory
+from tests.impl.storage import MemoryStorage
+
+_CURRENT = Path("/tmp/result.json")
+_PREVIOUS = Path("/root/result.json")
 
 
 class TestResultsMismatchError:
-    def test_str_with_success_return_str(
-        self,
-        test_regression: Regression,
-    ) -> dict[str, str]:
-        try:
-            test_regression.check({})
-        except ResultsMismatchError as mismatch:
-            return {"__str__": str(mismatch)}
+    def test_str_with_success_returns_str(self) -> str:
+        mismatch = ResultsMismatchError(
+            current=_CURRENT,
+            previous=_PREVIOUS,
+            storage=MemoryStorage(),
+            command_runner=CommandRunnerHistory().run,
+        )
 
-        raise NotImplementedError
+        return str(mismatch)
 
-    def test_accept_diff_with_success(
-        self,
-        test_regression: Regression,
-        memory_storage: MemoryStorage,
-    ) -> dict[str, str]:
-        try:
-            test_regression.check({})
-        except ResultsMismatchError as mismatch:
-            mismatch.accept_diff()
+    def test_accept_diff_with_previous_file(self) -> dict[str, str]:
+        storage = MemoryStorage()
+        storage.memory[_CURRENT] = b"current"
+        storage.memory[_PREVIOUS] = b"previous"
+        mismatch = ResultsMismatchError(
+            current=_CURRENT,
+            previous=_PREVIOUS,
+            storage=storage,
+            command_runner=CommandRunnerHistory().run,
+        )
 
-        return memory_storage.json_memory
+        mismatch.accept_diff()
 
-    def test_show_diff_with_success(
-        self,
-        test_regression: Regression,
-        command_history: CommandRunnerHistory,
-    ) -> dict[str, Any]:
-        try:
-            test_regression.check({})
-        except ResultsMismatchError as mismatch:
-            mismatch.show_diff("code -d -r -w {current} {previous}")
+        return storage.json_memory
 
-        return {"commands": command_history.history}
+    def test_accept_diff_without_previous_file(self) -> dict[str, str]:
+        storage = MemoryStorage()
+        storage.memory[_CURRENT] = b"current"
+        mismatch = ResultsMismatchError(
+            current=_CURRENT,
+            previous=_PREVIOUS,
+            storage=storage,
+            command_runner=CommandRunnerHistory().run,
+        )
+
+        mismatch.accept_diff()
+
+        return storage.json_memory
+
+    def test_show_diff_without_previous_file(self) -> dict[str, object]:
+        storage = MemoryStorage()
+        storage.memory[_CURRENT] = b"current"
+        command_history = CommandRunnerHistory()
+        mismatch = ResultsMismatchError(
+            current=_CURRENT,
+            previous=_PREVIOUS,
+            storage=storage,
+            command_runner=command_history.run,
+        )
+
+        mismatch.show_diff("diff {current} {previous}")
+
+        return {"commands": command_history.history, "memory": storage.json_memory}

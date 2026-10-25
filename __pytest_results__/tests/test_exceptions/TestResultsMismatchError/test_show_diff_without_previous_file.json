@@ -1,0 +1,9 @@
+{
+  "commands": [
+    "diff /tmp/result.json /root/result.json"
+  ],
+  "memory": {
+    "/tmp/result.json": "current",
+    "/root/result.json": ""
+  }
+}
