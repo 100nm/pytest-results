@@ -24,7 +24,7 @@ license-files = ["LICENSE"]
 readme = "README.md"
 requires-python = ">=3.12, <3.16"
 authors = [{ name = "remimd" }]
-keywords = []
+keywords = ["pytest", "regression", "snapshot", "snapshot-testing", "testing"]
 classifiers = [
     "Development Status :: 4 - Beta",
     "Topic :: Software Development :: Libraries",

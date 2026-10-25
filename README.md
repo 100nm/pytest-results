@@ -8,7 +8,9 @@
 
 Easily spot regressions in your tests.
 
-[Pytest](https://github.com/pytest-dev/pytest) plugin for writing non-regression tests.
+A [Pytest](https://github.com/pytest-dev/pytest) plugin for snapshot testing: a test
+returns a value, the plugin stores it in a snapshot file, and compares the next runs
+with it.
 
 ## Installation
 
@@ -20,26 +22,37 @@ pip install pytest-results
 
 ## Quick start
 
-First, return the value where you want to check the regression:
+Return the value to check from your test:
 
 ```python
 def test_function():
     return {"hello": "world"}
 ```
 
-All results are stored in JSON files at the root of your project in the
-`__pytest_results__` folder.
+The first run fails, since there is no snapshot to compare with yet. Accept the new
+results to store them as snapshots:
 
-In case of regression, to open the interactive comparison, add the `--ide` parameter
-to Pytest with the name of your IDE:
+```bash
+pytest --accept-diff
+```
+
+The snapshots are stored as JSON files in the `__pytest_results__` folder, at the root
+of your project. Commit this folder: from now on, the test fails whenever its result
+changes.
+
+When a test fails, open the differences in your IDE with the `--ide` option:
 
 ```bash
 pytest --ide vscode
 ```
 
-_At present, the IDEs supported are `cursor`, `pycharm` and `vscode`._
+_The supported IDEs are `cursor`, `pycharm` and `vscode`._
 
-## Resources
+If the changes are expected, update the snapshots with `pytest --accept-diff`.
 
-* [**Regression fixture**](https://github.com/100nm/pytest-results/tree/prod/documentation/regression-fixture.md)
-* [**Configuration**](https://github.com/100nm/pytest-results/tree/prod/documentation/configuration.md)
+## Documentation
+
+* [**Regression fixture**](https://github.com/100nm/pytest-results/blob/prod/docs/regression-fixture.md):
+  checking results, supported types, snapshot files and custom formats.
+* [**Configuration**](https://github.com/100nm/pytest-results/blob/prod/docs/configuration.md):
+  command line options and configuration file.
