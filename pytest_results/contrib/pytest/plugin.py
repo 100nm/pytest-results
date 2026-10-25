@@ -1,7 +1,7 @@
-import os
+import subprocess
 import warnings
 from collections.abc import Generator, Iterable, Mapping, Sequence
-from functools import wraps
+from functools import partial, wraps
 from inspect import iscoroutinefunction
 from pathlib import Path
 from typing import Any, ClassVar
@@ -128,9 +128,10 @@ def pytest_pyfunc_call(
 @pytest.fixture(scope="function")
 def regression(request: pytest.FixtureRequest, tmp_path: Path) -> _RegressionStack:
     dirname = "__pytest_results__"
+    command_runner = partial(subprocess.run, shell=True)
     storage = _LocalStorage(request.config.rootpath / dirname, tmp_path / dirname)
     testinfo = get_testinfo(request)
-    delegate = _RegressionImpl(testinfo, storage, os.system)
+    delegate = _RegressionImpl(testinfo, storage, command_runner)
     return _RegressionStack(delegate)
 
 
