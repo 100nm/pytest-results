@@ -1,0 +1,6 @@
+[
+  "tests",
+  "test_testinfo",
+  "TestWithinClass",
+  "test_get_testinfo_with_class_returns_tuple"
+]

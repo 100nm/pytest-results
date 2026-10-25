@@ -49,7 +49,7 @@ class PytestResultsConfig:
 
     def __get_option_or_ini[T](self, key: str) -> T | None:
         config = self.__config
-        return config.getoption(key, default=config.getini(key))
+        return config.getoption(key) or config.getini(key)
 
 
 @pytest.hookimpl
@@ -172,9 +172,6 @@ def __on_mismatches(
     mismatches: Sequence[ResultsMismatchError],
     pytest_config: pytest.Config,
 ) -> None:
-    if not mismatches:
-        return
-
     config = PytestResultsConfig(pytest_config)
 
     if config.accept_diff:

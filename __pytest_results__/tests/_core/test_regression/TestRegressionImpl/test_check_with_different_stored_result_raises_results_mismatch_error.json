@@ -1,0 +1,4 @@
+{
+  "/root/tests/test_module/TestClass/test_function.json": "{\n  \"title\": \"Hello\"\n}",
+  "/tmp/tests/test_module/TestClass/test_function.json": "{\n  \"title\": \"Goodbye\"\n}"
+}

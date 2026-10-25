@@ -11,8 +11,8 @@ dev = [
     "ruff",
 ]
 test = [
-    "coverage",
     "pytest-asyncio",
+    "pytest-cov",
 ]
 
 [project]
@@ -54,12 +54,7 @@ pytest-results = "pytest_results.contrib.pytest.plugin"
 Repository = "https://github.com/100nm/pytest-results"
 
 [tool.coverage.report]
-exclude_lines = [
-    "pass",
-    "pragma: no cover",
-    "raise NotImplementedError",
-]
-omit = ["pytest_results/contrib/pytest/plugin.py"]
+exclude_also = ["raise NotImplementedError"]
 
 [tool.hatch.build]
 skip-excluded-dirs = true
@@ -88,7 +83,7 @@ warn_required_dynamic_aliases = true
 
 [tool.pytest]
 python_files = ["test_*.py"]
-addopts = ["--tb", "short"]
+addopts = ["--tb", "short", "--cov", "./", "--cov-report", "term-missing:skip-covered", "-p", "no:pytest-results"]
 asyncio_default_fixture_loop_scope = "session"
 asyncio_mode = "auto"
 testpaths = ["**/tests/"]

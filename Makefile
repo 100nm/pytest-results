@@ -15,5 +15,4 @@ mypy:
 	uv run mypy ./
 
 pytest:
-	uv run coverage run -m pytest
-	uv run coverage report -m --skip-covered
+	uv run pytest
