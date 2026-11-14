@@ -24,9 +24,24 @@ license-files = ["LICENSE"]
 readme = "README.md"
 requires-python = ">=3.12, <3.16"
 authors = [{ name = "remimd" }]
-keywords = ["pytest", "regression", "snapshot", "snapshot-testing", "testing"]
+keywords = [
+    "pytest",
+    "pytest-plugin",
+    "snapshot",
+    "snapshots",
+    "snapshot-testing",
+    "regression",
+    "regression-testing",
+    "approval-testing",
+    "golden-master",
+    "golden-files",
+    "json",
+    "diff",
+    "testing",
+]
 classifiers = [
     "Development Status :: 4 - Beta",
+    "Framework :: Pytest",
     "Topic :: Software Development :: Libraries",
     "Topic :: Software Development :: Libraries :: Python Modules",
     "Topic :: Software Development :: Testing",
@@ -51,6 +66,7 @@ dependencies = [
 pytest-results = "pytest_results.contrib.pytest.plugin"
 
 [project.urls]
+Issues = "https://github.com/100nm/pytest-results/issues"
 Repository = "https://github.com/100nm/pytest-results"
 
 [tool.coverage.report]
